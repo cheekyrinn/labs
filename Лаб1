@@ -1,0 +1,153 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <conio.h>
+#include <io.h>
+
+
+int CheckInt() {
+    int n = 0;
+    while (scanf_s("%d", &n) != 1 || getchar() != '\n')
+    {
+        printf("Error input number\n");
+        rewind(stdin);
+    }
+    return n;
+}
+
+int main(int argc, char* argv[]) {
+
+    FILE* file;
+
+    char* name = argv[1];
+
+    if (argv[1] == NULL) {
+        printf("No arguments!");
+    }
+    else {
+
+
+        printf("skolko chisel ");
+
+        int x = CheckInt();
+
+        errno_t err = fopen_s(&file, name, "wb");
+        if (err != 0) {
+
+            fprintf(stderr, "Error opening file for writing.\n");
+
+            return 1;
+        }
+
+        for (int i = 0; i < x; i++) {
+
+            printf("input number: ");
+            int num = CheckInt();
+            fwrite(&num, sizeof(int), 1, file);
+
+        }
+        fclose(file);
+
+        err = fopen_s(&file, name, "rb");
+        if (err != 0) {
+            fprintf(stderr, "Error opening file for reading.\n");
+            return 1;
+        }
+
+        for (int i = 0; i < x; i++) {
+            int read_number;
+            fread(&read_number, sizeof(int), 1, file);
+            printf("Number[%d]: %d\n", i, read_number);
+        }
+        fclose(file);
+        return 0;
+    }
+}
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <conio.h>
+#include <io.h>
+
+int CheckInt() {
+    int n = 0;
+    while (scanf_s("%d", &n) != 1 || getchar() != '\n') {
+        printf("Error input number\n");
+        rewind(stdin);
+    }
+    return n;
+}
+
+int main(int argc, char* argv[]) {
+    FILE* file;
+    char* name = argv[1];
+
+    if (argv[1] == NULL) {
+        printf("No arguments!\n");
+        return 1;
+    }
+
+    printf("skolko chisel ");
+    int x = CheckInt();
+
+    errno_t err = fopen_s(&file, name, "wb");
+    if (err != 0) {
+        fprintf(stderr, "Error opening file for writing.\n");
+        return 1;
+    }
+
+    for (int i = 0; i < x; i++) {
+        printf("input number: ");
+        int num = CheckInt();
+        fwrite(&num, sizeof(int), 1, file);
+    }
+    fclose(file);
+
+    err = fopen_s(&file, name, "r+b");
+    if (err != 0) {
+        fprintf(stderr, "Error opening file for reading and writing.\n");
+        return 1;
+    }
+
+    int number;
+    int position = 0;
+
+    while (1) {
+        fseek(file, position * sizeof(int), SEEK_SET);
+        if (fread(&number, sizeof(int), 1, file) != 1) {
+            break;
+        }
+        if (number == 0) {
+            break;
+        }
+        fseek(file, position * sizeof(int), SEEK_SET);
+        int next_position = position + number;
+        number = 0;
+        fwrite(&number, sizeof(int), 1, file);
+        position = next_position;
+        if (position >= x) {
+            break;
+        }
+    }
+    fclose(file);
+
+    err = fopen_s(&file, name, "rb");
+    if (err != 0) {
+        fprintf(stderr, "Error opening file for reading.\n");
+        return 1;
+    }
+
+    printf("Numbers after zeroing elements:\n");
+    for (int i = 0; i < x; i++) {
+        fread(&number, sizeof(int), 1, file);
+        printf("Number[%d]: %d\n", i, number);
+    }
+    fclose(file);
+
+    //
+
+    //
+
+    return 0;
+}
+
+
