@@ -1,0 +1,153 @@
+#include <string.h>
+#include "common.h"
+
+struct movie {
+    unsigned int length;
+    char* name;
+    struct {
+        char genre[16];
+        int year;
+    } additional_info;
+};
+
+struct movie_list {
+    struct movie* list;
+    int size;
+};
+
+void print_movie(struct movie* m) {
+    printf("--------\n");
+    printf("- name: %s\n", m->name);
+    printf("- length: %d:%02d\n", m->length / 60, m->length % 60);
+    printf("- genre: %s\n", m->additional_info.genre);
+    printf("- year: %u\n", m->additional_info.year);
+}
+
+void read_genre(struct movie* m) {
+    char* genre = NULL;
+    read_string(&genre, 15);
+    strcpy(m->additional_info.genre, genre);
+    free(genre);
+}
+
+void read_movie(struct movie* m) {
+    *m = (struct movie) {};
+
+    printf("enter the movie's name: ");
+    read_string(&m->name, -1);
+
+    printf("enter the movie's length (in minutes): ");
+    read_int(&m->length);
+
+    printf("enter the movie's genre (max 15 characters): ");
+    read_genre(m);
+
+    printf("enter the movie's year: ");
+    read_int_range(&m->additional_info.year, 1900, 2025, NULL);
+}
+
+void print_movies(struct movie_list* movies) {
+    if (movies->size == 0) {
+        printf("there are no movies\n");
+    } else {
+        printf("all movies:\n");
+        for (int i = 0; i < movies->size; i++) {
+            print_movie(movies->list + i);
+        }
+    }
+}
+
+void print_movies_by_name(struct movie_list* movies, const char* name) {
+    printf("movies with name \"%s\":\n", name);
+    for (int i = 0; i < movies->size; i++) {
+        if (strcmp(movies->list[i].name, name) == 0) {
+            print_movie(&movies->list[i]);
+        }
+    }
+}
+
+int remove_movies_by_length(struct movie_list* movies, int length) {
+    int removed = 0;
+    for (int i = 0; i < movies->size; i++) {
+        if (movies->list[i].length > length) {
+            for (int j = i; j < movies->size - 1; j++) {
+                movies->list[j] = movies->list[j + 1];
+            }
+
+            movies->size--;
+            removed++;
+        }
+    }
+    return removed;
+}
+
+void add_movie(struct movie_list* movies) {
+    movies->size++;
+    movies->list = mem_reallocate(movies->list, movies->size * sizeof(struct movie));
+    read_movie(&movies->list[movies->size - 1]);
+}
+
+void remove_movies(struct movie_list* movies) {
+    int length, removed;
+    printf("enter the maximal length: ");
+    read_int(&length);
+    removed = remove_movies_by_length(movies, length);
+    printf("removed %d movies\n", removed);
+}
+
+void filter_movies(struct movie_list* movies) {
+    char* name = NULL;
+    printf("enter the name: ");
+    read_string(&name, -1);
+    print_movies_by_name(movies, name);
+}
+
+void task2_menu(struct movie_list* movies) {
+    int choice;
+    while (1) {
+        printf("actions:\n");
+        printf("1. add a new movie\n");
+        printf("2. remove movies by length\n");
+        printf("3. print all movies\n");
+        printf("4. filter movies by name\n");
+        printf("enter an action number (1-4, 0 to exit): ");
+        read_int_range(&choice, 0, 4, "invalid action\n");
+        switch (choice) {
+            case 1:
+                add_movie(movies);
+                break;
+            case 2:
+                remove_movies(movies);
+                break;
+            case 3:
+                print_movies(movies);
+            break;
+            case 4:
+                filter_movies(movies);
+                break;
+            case '\n':
+                continue;
+            default:
+                return;
+        }
+    }
+}
+
+void movie_list_free(struct movie_list* movies) {
+    if (movies->list != NULL) {
+        for (int i = 0; i < movies->size; i++) {
+            free(movies->list[i].name);
+        }
+        free(movies->list);
+    }
+}
+
+int task2() {
+    struct movie_list movies = {
+            .list = NULL,
+            .size = 0
+    };
+    task2_menu(&movies);
+    movie_list_free(&movies);
+    return 0;
+}
