@@ -1,0 +1,17 @@
+#include "common.h"
+
+struct number {
+    unsigned int data : 31;
+    unsigned int sign : 1;
+};
+
+int task1() {
+    int x;
+    struct number* n;
+    printf("enter a 32-bit integer: ");
+    read_int(&x);
+    n = (struct number*) &x;
+    printf("number %d is %s\n", x, n->sign ? "negative" : "positive");
+
+    return 0;
+}
