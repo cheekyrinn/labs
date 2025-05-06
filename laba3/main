@@ -1,0 +1,29 @@
+#include "common.h"
+
+void main_menu() {
+    int choice;
+    while (1) {
+        printf("tasks:\n");
+        printf("1. check if a number is positive or negative\n");
+        printf("2. manage movies\n");
+        printf("enter a task number (1-2, 0 to exit): ");
+        read_int_range(&choice, 0, 2, "invalid task number\n");
+        switch (choice) {
+            case 1:
+                task1();
+                break;
+            case 2:
+                task2();
+                break;
+            case '\n':
+                continue;
+            default:
+                return;
+        }
+    }
+}
+
+int main() {
+    main_menu();
+    return 0;
+}
